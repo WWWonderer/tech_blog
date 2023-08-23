@@ -93,7 +93,8 @@ As discussed above, GitHub uses Jekyll to build and deploy the site on their bac
   ```
   to host the site at localhost:4000. 
 
-* **Using [Docker][docker]:**
+* **Using [Docker][docker]**
+
   Even though Ruby might be extremely cool, not everyone is familiar with it (including myself), and not everyone wants to install yet another language and everything associated with it to their computer for just one simple application. Docker solves this problem by providing the necessary environment for Jekyll to be able to edit and preview your blog. 
 
   First, we can get a Docker image of Jekyll:
