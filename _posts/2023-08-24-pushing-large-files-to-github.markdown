@@ -43,7 +43,11 @@ To use LFS, one should install it and then specifically track large files with:
 git lfs track "*.<extension>"
 ```
 
-Afterwards, all files ending with `<extension>` will be replaced by a text pointer, and a `.gitattributes` file specifying the tracked extensions will be created. The original large files will be moved to the `lfs` cache inside the `.git` repository, and only their pointers will be tracked by git. You can then commit and push as usual. 
+Afterwards, all files ending with `<extension>` will be replaced by a text pointer, and a `.gitattributes` file specifying the tracked extensions will be created. The original large files will be moved to the `lfs` cache inside the `.git` repository, and only their pointers will be tracked by git. You can then commit and push as usual. To view the files tracked by LFS, type:
+
+```
+git lfs ls-files --all --long
+```
 
 One caveat of the above is that `git lfs track` creates a new commit. Say you have `commit1` where you committed some large files which cannot be pushed to the remote repository, so you did `commit2` using LFS, and you push again. This will still fail as git pushes the commits sequentially, and while `commit2` adds the large files to LFS, `commit1` didn't and you get the same error. You can solve this error by squashing the last 2 commits as 1 using interactive rebase:
 
