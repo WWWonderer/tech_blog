@@ -78,7 +78,7 @@ git lfs migrate info
 
 This command will print the extensions of the largest files in descending order of file size.
 
-
+As a last note, one should be careful with the use of LFS and GitHub as GitHub only allows 1GB of free LFS quota, any more would need the purchase of additional data packs, where one pack costs $5 per month and provides 50GB of storage. If your data quota is exceeded, LFS will be disabled for your account.
 
 
 
