@@ -12,7 +12,7 @@ categories: "software_engineering"
 
 A good way to define the model is to use a simple example of counting word occurrence in a bunch of documents. The following diagram depicts this process:
 
-![p6_mapreduce_1](/assets/images/p6_mapreduce_1.png)
+![p6_mapreduce_1](https://github.com/WWWonderer/tech_blog/blob/main/assets/images/p6_mapreduce_1.png?raw=true)
 
 As shown above, the **map** operation consists of counting the word occurrences in each document, resulting in a set of **intermediate key/value pairs**, and the **reduce** operation consists of **merging** the intermediate pairs by key across the documents to get a global occurence count. The reason we do this is because both map and reduce operations only need a fraction of the documents in memory, and can thus be parallelized across different threads, processes or computer nodes. This parallelization can be hidden from the user of mapreduce, and the user only needs to define the map and the reduce functions as if they were on a single machine. In this example, the pseudocode of these functions are:
 
@@ -43,11 +43,11 @@ The above model evidently does not limit to the word count example. In practice,
 
 The implementation of parallelization is abstracted away from the map and reduce functions, and depends on the environment in which mapreduce is built. For large clusters of commodity PCs connected by networking, we have the following architecture:
 
-![p6_mapreduce_2](/assets/images/p6_mapreduce_2.png){:style="display:block; margin-left:auto; margin-right:auto"}
+![p6_mapreduce_2](https://github.com/WWWonderer/tech_blog/blob/main/assets/images/p6_mapreduce_2.png?raw=true){:style="display:block; margin-left:auto; margin-right:auto"}
 
 As shown above, a user's mapreduce program is first forked into different nodes, which are controlled by a master node whose role is to assign and track jobs on other worker nodes in a cluster. Out of the available idle nodes and according to configuration, some will be assigned the role of map, others the role of reduce. A shuffling process occurs in the middle to aggregate the results of all map nodes to the reduce nodes. This process can be break down more in detail as follow:
 
-![p6_mapreduce_3](/assets/images/p6_mapreduce_3.png){:style="display:block; margin-left:auto; margin-right:auto"}
+![p6_mapreduce_3](https://github.com/WWWonderer/tech_blog/blob/main/assets/images/p6_mapreduce_3.png?raw=true){:style="display:block; margin-left:auto; margin-right:auto"}
 
 In the original paper, map nodes' intermediate data pairs are written to their own local disk, and partitioned according to the hash number of the keys: $partition = hash(key)\ mod\ R$, where $R$ is the number of desired reduce outputs. Within a given partition, the intermediate key/value pairs are sorted in increasing key order, which facilitate key lookup. In some cases, a **combiner function** identical to the reduce function is **applied on the map side** to decrease the workload of the reduce nodes. This is only possible when the reduce function is commutative and associative, and this early partial merging can speed up certain classes of mapreduce operations.
 
