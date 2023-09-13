@@ -4,7 +4,7 @@ date: 2023-09-13
 categories: "algorithms"
 ---
 
-This post is inspired by [leetcode 106][lc_106], and the excellent solution breakdown by [leetcode-master][lc_master_106]. 
+This post is inspired by [leetcode 106][lc_106] and the excellent solution breakdown by [leetcode-master][lc_master_106]. 
 
 **Problem**
 
@@ -12,7 +12,7 @@ Given the inorder and postorder traversal results of a tree (assuming tree nodes
 
 inorder: [9, 3, 15, 20, 7]\
 postorder: [9, 15, 7, 20, 3]\
-tree: ![p7_buildtree_1](/assets/images/p7_buildtree_1.png){:style="display:block; margin-left:auto; margin-right:auto"}
+tree: ![p7_buildtree_1](https://raw.githubusercontent.com/WWWonderer/tech_blog/main/assets/images/p7_buildtree_1.png){:style="display:block; margin-left:auto; margin-right:auto"}
 
 **Strategy**
 
