@@ -15,7 +15,7 @@ The most prevalent case of backpropagation is within a multilayer perceptron (ML
 
 A layer in MLP is nothing but a linear projection of a vector of dimension $n$ to a vector of dimension $m$ ($n$ can equal $m$), coupled with an activation function ($a(.)$) that breaks linearity. For simplicity, the bias vector $\mathbf{b}$ is omitted here, but it may very well be seen as incorporated into the projection matrix by adding scalar $1$ as element $a_{n+1}$ in $\mathbf{a}$, resulting in the same process as described below. We define the projection matrix's weights are our model's parameters. Let the input vector be $\mathbf{a}$ and the output vector be $\mathbf{b}$, the following graph shows this process:
 
-![p7_buildtree_1](https://raw.githubusercontent.com/WWWonderer/tech_blog/main/assets/images/p8_backpropagation_1.png){:style="display:block; margin-left:auto; margin-right:auto"}
+![p8_backpropagation_1](https://raw.githubusercontent.com/WWWonderer/tech_blog/main/assets/images/p8_backpropagation_1.png){:style="display:block; margin-left:auto; margin-right:auto"}
 
 In matrix form, treating input vector as row vector (aligning with implementations of NumPy and PyTorch), we have:
 
