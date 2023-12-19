@@ -1,0 +1,131 @@
+---
+title: "LoRA"
+date: 2023-12-14
+categories: "deep_learning"
+---
+
+**Problem**
+
+When training deep learning models, the parameters of the model must be stored in VRAM (GPU memory) in order to perform matrix operations. For large language models (LLM), as the number of parameters grow to astronomical numbers (eg. 175 billion for GPT-3, 70 billion for largest Llama2), the training becomes infeasible on commercial devices, and requires complex parallelism in high-performance computing clusters, which is a resource unavailable to most developers.
+
+**LoRA**
+
+LoRA is a 2021 paper by Edward J. Hu et al. that addressed specifically this problem. The core idea of the paper is to decompose the parameter matrix into the product of 2 lower ranked matrices, and update the (much smaller number) weights of the 2 lower ranked matrices instead. More precisely, let $W$ be the original weight matrix with dimension $d \times k$, we have:
+
+$$\begin{aligned}
+W^{d\times k} = B^{d\times r}A^{r\times k}
+\end{aligned}$$
+
+where $B \in \mathbb{R}^{d \times r}$ and $A \in \mathbb{R} ^ {r \times k}$ are smaller matrices of rank $r$ where $r \ll min(d, k)$. When optimizing the gradient of the loss w.r.t. $W$, we instead optimize the gradient of the loss w.r.t. $B$ and $A$, as $W$ has been reparametrized by the latter two. As an example, say $W$ has dimension $64 \times 512$, we reparametrize it to be the product of matrices $B$ and $A$ of dimensions $64 \times 8$ and $8 \times 512$. The gradient of the loss w.r.t. $W$ ($\nabla W$) has $64 \times 512 = 32768$ values, while $\nabla B$ and $\nabla A$ combined has only $64 \times 8 + 8 \times 512 = 4608$ values.
+
+In the original paper, the pretrained weight matrix $W_0$ is reparametrized by $W_0 + \Delta W = W_0 + BA$, where $W_0 \in \mathbb{R}^{d \times k}$, $B \in \mathbb{R}^{d \times r}$ and $A \in \mathbb{R}^{r \times k}$. The core idea is the same, but this way $W_0$ can remain frozen, and different $\Delta W = BA$ can be used for different finetuning tasks, increasing model adaptability. The reparametrized forward process will then be changed from $h = W_0x$ to:
+
+$$\begin{aligned}
+h = W_0x + \Delta Wx = W_0x + BAx
+\end{aligned}$$
+
+As the matrix rank is bounded by its number of columns or rows, such reparametrization often leads to rank reduction of the matrix, theoretically hindering its expressivity. However, experimentation results show that such rank reduction does not affect the model's accuracy for most finetuning tasks, as the latter has a very low "intrinsic rank". 
+
+**$B$ and $A$**
+
+$A$ is initialized as a random Gaussian $\mathcal{N}(0, \sigma^2)$, and $B$ is initialized as zeros. This way, the initial $BA = \Delta W$ will be 0, and the initial forward pass will be the same as the original pretrained model. The backpropagation now happens w.r.t. $B$ and $A$. We have:
+
+$$\begin{aligned}
+\frac{\partial L}{\partial B} &= \frac{\partial L}{\partial h} \frac{\partial h}{\partial B} \\
+&= \frac{\partial L}{\partial h} x^TA^T \\
+\frac{\partial L}{\partial A} &= \frac{\partial L}{\partial h} \frac{\partial h}{\partial A} \\
+&= B^T \frac{\partial L}{\partial h} x^T \\
+\end{aligned}$$
+
+To following code can be used to verify the above derivations:
+
+{%highlight python %}
+import torch
+
+A = torch.rand(2, 3, requires_grad=True)
+B = torch.rand(1, 2, requires_grad=True)
+x = torch.rand(3, 1, requires_grad=True)
+
+L = B @ A @ x
+L.retain_grad()
+L.backward()
+
+# verify gradient of B
+print("grad B pytorch: ", B.grad)
+print("grad B manual: ", L.grad @ x.T @ A.T)
+
+# verify gradient of A
+print("grad A pytorch: ", A.grad)
+print("grad A manual: ", B.T @ L.grad @ x.T)
+{% endhighlight %}
+
+During deployment, a finetuned model's $BA$ can be stored into the initial matrix $W_0$ by simple addition, this results in no additional inference latency, an advantage over most other methods.
+
+**Implementation**
+
+LoRA has a nice open source implementation. For details it is best to go to the [original repo][Lora_repo]. However, the main idea can be found in the [Linear class][Linear_class]. Here, notice the addition of $B$ and $A$ and how the weight $W_0$ is frozen in `__init__`:
+
+{%highlight python %}
+...
+if r > 0:
+    self.lora_A = nn.Parameter(self.weight.new_zeros((r, in_features)))
+    self.lora_B = nn.Parameter(self.weight.new_zeros((out_features, r)))
+    self.scaling = self.lora_alpha / self.r
+    # Freezing the pre-trained weight matrix
+    self.weight.requires_grad = False
+self.reset_parameters() # initialize A with He initialization (not Gaussian as in paper, but doesn't change main idea) and B with zeros
+...
+{% endhighlight %}
+
+Here, notice how `forward` is modified to use $BA$:
+
+{% highlight python %}
+...
+if self.r > 0 and not self.merged:
+    result = F.linear(x, T(self.weight), bias=self.bias)            
+    result += (self.lora_dropout(x) @ self.lora_A.transpose(0, 1) @ self.lora_B.transpose(0, 1)) * self.scaling
+    return result
+...
+{% endhighlight %}
+
+Here, notice how $BA$ is merged into $W_0$ in `train`:
+{% highlight python %}
+...
+# mode = False
+else:
+    if self.merge_weights and not self.merged:
+        # Merge the weights and mark it
+        if self.r > 0:
+            self.weight.data += T(self.lora_B @ self.lora_A) * self.scaling
+        self.merged = True 
+{% endhighlight %}
+
+`self.scaling` ($\frac{\alpha}{r}$) is just a scaling parameter ($\alpha$) attached to LoRA for different ranks `r`, for the purpose of avoiding to change the model learning rate when switching `r`. It serves the same purpose as the learning rate.
+
+**Integration with SoTA models**
+
+LoRA has since been integrated into the Huggingface peft library, the primary library for efficient open source model finetuning. I have found an [excellent tutorial][llama2_finetuning] on how to use LoRA (and quantization) to finetune the 7 billion Llama2 model on a single T4 GPU with just 16GB of VRAM. With the following few lines:
+
+{% highlight python %}
+from peft import LoraConfig
+
+peft_params = LoraConfig(
+    lora_alpha=16,
+    lora_dropout=0.1,
+    r=64,
+    bias="none",
+    task_type="CAUSAL_LM",
+)
+
+trainer = SFTTrainer(
+    ...
+    peft_config=peft_params,
+    ...
+)
+{% endhighlight %}
+
+LLMs become more accessible.
+
+[Lora_repo]: https://github.com/microsoft/LoRA/tree/main
+[Linear_class]: https://github.com/microsoft/LoRA/blob/main/loralib/layers.py#L90
+[llama2_finetuning]: https://www.datacamp.com/tutorial/fine-tuning-llama-2
