@@ -115,7 +115,7 @@ Below is the key implementation part for the epsilon-greedy:
 
 Some experimentation results on a 3-arm problem can be seen here:
 
-![p15_multibandit_epsilon_greedy_1](assets\images\p15_multibandit_epsilon_greedy_1.png){:style="display:block; margin-left:auto; margin-right:auto"}
+![p15_multibandit_epsilon_greedy_1](https://raw.githubusercontent.com/WWWonderer/tech_blog/main/assets/images/p15_multibandit_epsilon_greedy_1.png){:style="display:block; margin-left:auto; margin-right:auto"}
 
 We can conclude that the value of $\epsilon$ does affect convergence, and a small value works best in the long run. 
 
