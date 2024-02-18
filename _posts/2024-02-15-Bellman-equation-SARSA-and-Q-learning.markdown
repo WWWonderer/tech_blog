@@ -182,10 +182,12 @@ After 1000 episodes of training, we do have a reasonable taxi driver who is not 
         Your browser does not support the video tag.
     </video>
 </div>
+<br>
 
 
+Reference: [Reinforcement Learning - An Introduction][sutton_book] by Richard S. Sutton and Andrew G. Barto (chapters 3 and 6)
 
-
+[sutton_book]: https://www.andrew.cmu.edu/course/10-703/textbook/BartoSutton.pdf
 [convergence_SARSA]: https://link.springer.com/content/pdf/10.1023/A:1007678930559.pdf
 [convergence_Qlearning]: https://arxiv.org/pdf/2108.02827.pdf
 [gymnasium]: https://gymnasium.farama.org/index.html
