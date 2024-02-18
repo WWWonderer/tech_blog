@@ -8,7 +8,7 @@ categories: "reinforcement_learning"
 
 It is necessary to first establish a key concept - finite Markov decision processes (MDPs), as it is the classical formulation of the problem space comprising of most of reinforcement learning. MDPs comprise of states (S), actions (A) and rewards (R), where states can be changed by taking actions, and each action has an associated reward. In fact, the idea is quite intuitive and the following figure should be enough to give you a very good idea of MDP:
 
-![figure 1](\assets\images\p16_bellman_sarsa_qlearning_1.png){:style="display:block; margin-left:auto; margin-right:auto"}
+![figure 1](https://raw.githubusercontent.com/WWWonderer/tech_blog/main/assets/images/p16_bellman_sarsa_qlearning_1.png){:style="display:block; margin-left:auto; margin-right:auto"}
 
 The circles are states, the arrows are actions, and each action has an associated reward (not shown in graph). There is no limitation on how many states or what states are connected, states can connect to themselves and arrows can also be both ways. Mathematically, MDP is a probabilistic model of all the possible actions and their consequences for an event. Of course, we typically do not have such a model, but envisioning such a model can facilitate our theoretical analysis for a lot of problems.
 
@@ -178,7 +178,7 @@ After 1000 episodes of training, we do have a reasonable taxi driver who is not 
 
 <div style="text-align: center;">
     <video width="320" height="240" controls>
-        <source src="\assets\videos\p16_bellman_sarsa_qlearning_1.mp4" type="video/mp4">
+        <source src="https://github.com/WWWonderer/tech_blog/raw/main/assets/videos/p16_bellman_sarsa_qlearning_1.mp4" type="video/mp4">
         Your browser does not support the video tag.
     </video>
 </div>
