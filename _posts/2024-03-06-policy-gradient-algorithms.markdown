@@ -184,14 +184,15 @@ def select_action(state):
 
 In our example, the rewards for each time step $Q^\pi(a, s)$ is always 1. However, Pytorch's implementation added discount factor for generalization and normalization for stability, it does not change the main idea. What is important is to notice that `policy_loss` corresponds to the full final expression of gradient policy theorem, $$\mathbb{E}_\pi[Q^\pi(s, a)\nabla_\theta \ln \pi_\theta(a \vert s)]$$. In the implementation, we have `-log_prob * R` as minus $Q^\pi(s,a)\ln \pi_\theta(a\vert s)$, the minus is needed because we want to maximize $V_\pi$ while Pytorch's optimizer minimizes a function by default. The expected value $\mathbb{E}_\pi$ is coded through `policy_loss = torch.cat(policy_loss).sum()`. A more literal translation should be `policy_loss = torch.cat(policy_loss).mean()`, yet for optimization this does not matter as it is just a constant scaling factor equal to the episode's timesteps. Due to Leibniz rule, the aggregate gradient derived from the episode's experiences can be computed using `policy_loss.backward()` after accumulating the policy loss over all steps within the episode. The `optimizer.step()` function then updates the policy parameters, utilizing this computed gradient to steer the policy towards higher expected returns.
 
-Below are some visualized samples, the first 4 samples are during training and reached an ending condition for the episode (cart too far or pole too slanted), the last sample is after training with a polished policy. It is cropped to 1/5 of its original length but the cart-pole always remains in relative balance. 
+Below are some visualized samples, the first 4 samples are during training and reached an ending condition for the episode (cart too far or pole too slanted), the last sample is after training with a polished policy.
+
 
 <div style="display: flex; justify-content: space-between;">
-  <img src="assets\videos/p17_policy_gradient_1.gif" alt="First GIF" style="width: 20%;">
-  <img src="assets\videos\p17_policy_gradient_2.gif" alt="Second GIF" style="width: 20%;">
-  <img src="assets\videos\p17_policy_gradient_3.gif" alt="Third GIF" style="width: 20%;">
-  <img src="assets\videos\p17_policy_gradient_4.gif" alt="Fourth GIF" style="width: 20%;">
-  <img src="assets\videos\p17_policy_gradient_5.gif" alt="Fifth GIF" style="width: 20%;">
+  <img src="https://raw.githubusercontent.com/WWWonderer/tech_blog/main/assets/videos/p17_policy_gradient_1.gif" alt="First GIF" style="width: 20%;">
+  <img src="https://raw.githubusercontent.com/WWWonderer/tech_blog/main/assets/videos/p17_policy_gradient_2.gif" alt="Second GIF" style="width: 20%;">
+  <img src="https://raw.githubusercontent.com/WWWonderer/tech_blog/main/assets/videos/p17_policy_gradient_3.gif" alt="Third GIF" style="width: 20%;">
+  <img src="https://raw.githubusercontent.com/WWWonderer/tech_blog/main/assets/videos/p17_policy_gradient_4.gif" alt="Fourth GIF" style="width: 20%;">
+  <img src="https://raw.githubusercontent.com/WWWonderer/tech_blog/main/assets/videos/p17_policy_gradient_5.gif" alt="Fifth GIF" style="width: 20%;">
 </div>
 
 
