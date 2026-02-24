@@ -1,5 +1,5 @@
 ---
-title: "On KV cache"
+title: "On KV Cache"
 date: 2026-02-09
 categories: "deep_learning"
 ---
